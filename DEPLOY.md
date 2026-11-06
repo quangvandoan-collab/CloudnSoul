@@ -1,19 +1,21 @@
 # Putting the Cloud Temple and Church on Render
 
-The `site` folder holds the finished website. `render.yaml` tells Render how to serve it.
-On Render the site has no chat: visitors walk, sit, read, listen, light incense and float wishes on their own.
+`site` holds the website. `server.js` serves it and passes live messages between visitors,
+so people can see each other, chat, and share wishes, incense, the bell and koi feeding.
+Nothing is written to disk: messages are forgotten as soon as they are passed on.
 
-## 1. Put the files on GitHub
-1. Create a new, empty repository on GitHub, for example `cloud-temple`.
-2. Add `site`, `render.yaml` and this file to it. The website upload page only takes 100 files at a time and `site` has about 300, so use GitHub Desktop (drag the folder in and press Publish), or several uploads.
+## Render settings (Web Service)
+- Language: Node
+- Branch: main
+- Build Command: echo done
+- Start Command: node server.js
+- Instance Type: Free
 
-## 2. Create the site on Render
-1. In Render, choose New, then Blueprint, and pick the repository.
-2. Render reads `render.yaml` and creates a static site called `cloud-temple`. Its address will be like `https://cloud-temple.onrender.com` (Render adds letters if the name is taken).
-3. To use your own domain later, add it under the site's Settings, Custom Domains.
+## Updating
+After any change in `public`, run `python3 scripts/build-site.py`, copy the new `site` folder
+and `server.js` into the GitHub folder, then commit and push. Render redeploys by itself.
 
-## 3. Updating
-After any change in `public`, run `python3 scripts/build-site.py` and upload the new `site` folder.
-
-## Costs to watch
-Every visit downloads the 3D page, and music when played. On Render's free plan the monthly download allowance is small, so check the usage page in your first weeks.
+## Good to know
+- On the free plan the service sleeps after 15 minutes without visitors; the next visitor waits about a minute.
+- Chat is open to anyone. Public messages are checked for links, phone numbers and money words,
+  and each visitor can post only a few messages a minute. Check Vietnam's Decree 147/2024 rules.

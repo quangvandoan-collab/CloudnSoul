@@ -460,9 +460,14 @@ function frame(scene, place, camera, dt, now, me, seated = false) {
 
 // ---------- Connecting ----------
 async function connect() {
-  for (let i = 0; i < 25 && !window.claude?.use; i++) await new Promise((r) => { setTimeout(r, 200); });
-  // Where there is no live room (for example on a plain web host), chat is simply not offered.
-  const room = window.claude?.use ? await window.claude.use('room').catch(() => null) : null;
+  // Inside Claude the page uses Claude's live room. On our own server it uses the relay.
+  // Where neither exists (a plain file host), chat is simply not offered.
+  const relay = import('./relay.js').then((m) => m.connectRelay()).catch(() => null);
+  for (let i = 0; i < 25 && !window.claude?.use; i++) {
+    if (i === 3 && await Promise.race([relay, new Promise((r) => { setTimeout(() => r(null), 50); })])) break;
+    await new Promise((r) => { setTimeout(r, 200); });
+  }
+  const room = window.claude?.use ? await window.claude.use('room').catch(() => null) : await relay;
   if (!room) { state.off = true; paintPill(); return; }
   state.room = room;
   try {

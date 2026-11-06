@@ -1,17 +1,8 @@
-# Render reads this file when you choose "New > Blueprint" and pick this repository.
+# The site and its live chat relay, as one Render web service. Nothing is stored.
 services:
   - type: web
-    runtime: static
-    name: cloud-temple
-    staticPublishPath: ./site
-    buildCommand: ""
-    headers:
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /audio/*
-        name: Cache-Control
-        value: public, max-age=604800
-      - path: /vendor/*
-        name: Cache-Control
-        value: public, max-age=604800
+    runtime: node
+    name: cloudnsoul
+    plan: free
+    buildCommand: echo done
+    startCommand: node server.js
