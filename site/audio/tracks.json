@@ -1,0 +1,90 @@
+[
+ {
+  "id": "helen-2",
+  "name": "Helen 2",
+  "kind": "music",
+  "file": "am-may/helen-2.mp3",
+  "credit": "Helen 2, Nikos Spiliotis",
+  "licence": "Slide says free on YouTube with credit. Website use NOT confirmed. Song link missing."
+ },
+ {
+  "id": "calm-ambient",
+  "name": "Nhạc thư giãn",
+  "nameEn": "Calm ambient",
+  "kind": "music",
+  "file": "am-may/calm-ambient.mp3",
+  "licence": "Title says no copyright. Creator and terms UNKNOWN."
+ },
+ {
+  "id": "gentle-ambient",
+  "name": "Nhạc thiền nhẹ",
+  "nameEn": "Gentle ambient",
+  "kind": "music",
+  "file": "am-may/gentle-ambient.mp3",
+  "licence": "Title says royalty free, no copyright. Creator and terms UNKNOWN."
+ },
+ {
+  "id": "nhac-thien",
+  "name": "Nhạc thiền Phật giáo",
+  "nameEn": "Buddhist meditation music",
+  "kind": "music",
+  "file": "am-may/nhac-thien.mp3",
+  "licence": "Title says không bản quyền 2022. Creator and terms UNKNOWN."
+ },
+ {
+  "id": "rain-drops",
+  "name": "Giọt mưa",
+  "nameEn": "Rain drops",
+  "kind": "music",
+  "file": "am-may/rain-drops.mp3",
+  "licence": "Title says royalty free, no copyright. Creator and terms UNKNOWN."
+ },
+ {
+  "id": "heart-sutra",
+  "name": "Bát Nhã Tâm Kinh (tiếng Nhật)",
+  "nameEn": "Heart Sutra, Japanese chant",
+  "kind": "chant",
+  "file": "chants/heart-sutra.mp3",
+  "licence": "From your upload. Creator and terms UNKNOWN. Website use not confirmed."
+ },
+ {
+  "id": "amitabha",
+  "name": "Kinh A Di Đà",
+  "nameEn": "The Amitabha Sutra chant",
+  "kind": "chant",
+  "file": "chants/amitabha.mp3",
+  "licence": "From your upload. Creator and terms UNKNOWN. Website use not confirmed."
+ },
+ {
+  "id": "gyuto-1",
+  "name": "Các nhà sư Gyuto, phần 1",
+  "nameEn": "The Gyuto Monks, part 1",
+  "kind": "chant",
+  "file": "chants/gyuto-0.mp3",
+  "licence": "Appears to be a commercial album. NOT cleared for public use."
+ },
+ {
+  "id": "gyuto-2",
+  "name": "Các nhà sư Gyuto, phần 2",
+  "nameEn": "The Gyuto Monks, part 2",
+  "kind": "chant",
+  "file": "chants/gyuto-1.mp3",
+  "licence": "Appears to be a commercial album. NOT cleared for public use."
+ },
+ {
+  "id": "dhammapada-1",
+  "name": "Kinh Pháp Cú (sách nói), phần 1",
+  "nameEn": "The Dhammapada audiobook, part 1",
+  "kind": "chant",
+  "file": "chants/dhammapada-0.mp3",
+  "licence": "From your upload. Creator and terms UNKNOWN. Website use not confirmed."
+ },
+ {
+  "id": "dhammapada-2",
+  "name": "Kinh Pháp Cú (sách nói), phần 2",
+  "nameEn": "The Dhammapada audiobook, part 2",
+  "kind": "chant",
+  "file": "chants/dhammapada-1.mp3",
+  "licence": "From your upload. Creator and terms UNKNOWN. Website use not confirmed."
+ }
+]

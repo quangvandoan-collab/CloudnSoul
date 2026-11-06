@@ -1,0 +1,17 @@
+# Render reads this file when you choose "New > Blueprint" and pick this repository.
+services:
+  - type: web
+    runtime: static
+    name: cloud-temple
+    staticPublishPath: ./site
+    buildCommand: ""
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /audio/*
+        name: Cache-Control
+        value: public, max-age=604800
+      - path: /vendor/*
+        name: Cache-Control
+        value: public, max-age=604800

@@ -1,0 +1,210 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cloud Temple and Church</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap">
+<style>
+/* Layout concept: the hall fills the screen, with a quiet control strip. */
+:root { color-scheme: dark; --ink: #11141c; --panel: rgba(17,20,28,.86); --line: #586074; --cream: #f2ebdd; --muted: #b7bac4; --gold: #e0b75f; --display: "Playfair Display", Georgia, serif; --body: "Be Vietnam Pro", system-ui, sans-serif; }
+html, body { height: 100%; margin: 0; background: var(--ink); color: var(--cream); font: 14px/1.4 var(--body); }
+.stage { position: relative; height: 100%; overflow: hidden; }
+canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.title { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 14px; background: var(--panel); padding: 8px 12px; max-width: calc(100% - 32px); }
+.title h1 { margin: 0; font: 700 21px/1.15 var(--display); color: var(--gold); }
+.title p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.controls { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; pointer-events: none; }
+.group { display: flex; flex-wrap: wrap; gap: 4px; pointer-events: auto; }
+button { font: inherit; color: var(--cream); background: var(--panel); border: 1px solid var(--line); padding: 7px 11px; cursor: pointer; touch-action: none; }
+button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--ink); font-weight: 600; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.panel { border: 1px solid var(--gold); background: #1a1712; color: var(--cream); padding: 16px; width: min(760px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); box-sizing: border-box; }
+.panel::backdrop { background: rgba(5,4,3,.72); }
+.panel h2 { margin: 0 0 10px; font: 700 25px/1.2 var(--display); color: var(--gold); }
+.panel .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; align-items: center; }
+.panel label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 14px; }
+.panel button { touch-action: manipulation; }
+select { font: inherit; background: #26221b; color: var(--cream); border: 1px solid var(--line); padding: 7px; max-width: 100%; min-width: 0; }
+.close { float: right; }
+#biblePage { background: #f1e8d5; color: #2b2118; padding: 18px 22px; height: min(55dvh, 520px); overflow-y: auto; font-family: Georgia, "Noto Serif", serif; line-height: 1.6; }
+#biblePage h3 { font: 700 1.35em/1.2 var(--display); color: #6e1e1e; margin: 0 0 .6em; }
+#biblePage p { margin: 0 0 .5em; max-width: 62ch; }
+#biblePage sup { color: #8f2b22; font-size: .68em; font-weight: 700; font-family: var(--body); }
+.fine { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
+.stagebox { background: #0d0b09; border: 1px solid #4a3d24; padding: 18px 14px; text-align: center; min-height: 150px; display: flex; flex-direction: column; justify-content: center; gap: 8px; position: relative; overflow: hidden; }
+#hymnVerse { color: var(--gold); font-size: 13px; min-height: 18px; }
+#hymnNow { font: 500 clamp(21px, 4.4vw, 31px)/1.3 var(--display); color: #cfc7b6; }
+#hymnNow .sung { color: var(--gold); }
+#hymnNext { color: var(--muted); font-size: 16px; min-height: 22px; }
+#hymnBar { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--gold); }
+#hymnText { columns: 2 220px; margin-top: 10px; max-height: 26dvh; overflow-y: auto; color: var(--muted); font-size: 14px; line-height: 1.5; }
+#hymnText p { margin: 0 0 12px; break-inside: avoid; }
+#priestList { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 8px; }
+#priestList button { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; padding: 10px; min-width: 0; }
+#priestList canvas { width: 96px; height: 144px; image-rendering: pixelated; }
+#priestList small { font-weight: 400; font-size: 12.5px; line-height: 1.3; }
+#confessDialog { position: fixed; inset: auto 0 max(10px, env(safe-area-inset-bottom)) 0; margin-inline: auto; max-height: min(62dvh, 460px); overflow-y: auto; }
+#confessDialog::backdrop { background: transparent; }
+#confessDialog h2 { font-size: 21px; }
+#confessDialog p { margin: 0 0 8px; line-height: 1.5; max-width: 66ch; }
+.langRow { float: right; margin: 0 8px 0 0 !important; }
+.langRow button { padding: 6px 9px; font-size: 13px; touch-action: manipulation; }
+.boothRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; margin-bottom: 10px; }
+.boothPick { display: flex; align-items: center; gap: 8px; min-height: 48px; touch-action: manipulation; text-align: left; }
+.boothPick:disabled { opacity: .62; cursor: not-allowed; }
+.dot { width: 13px; height: 13px; border-radius: 50%; flex: none; }
+.dot.green { background: #27d65a; box-shadow: 0 0 8px #27d65a; }
+.dot.red { background: #ef2b20; box-shadow: 0 0 8px #ef2b20; }
+.strong { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; }
+.prompts { margin: 0 0 10px; padding-left: 20px; line-height: 1.45; color: var(--cream); }
+#confessBody label { display: block; margin-bottom: 4px; }
+#confessText { width: 100%; box-sizing: border-box; font: 16px/1.45 var(--body); background: #0f0d0a; color: var(--cream); border: 1px solid var(--line); padding: 9px; margin-bottom: 8px; resize: vertical; }
+.prayerText { font-family: Georgia, serif; font-size: 15px; color: #e9dfc8; }
+[hidden] { display: none !important; }
+.home { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; background: #120e0a; color: var(--cream); }
+.homeTop { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); }
+.homeTop p { margin: 0; font: 700 clamp(20px, 3vw, 30px)/1.2 var(--display); color: var(--gold); }
+.homeLang { display: flex; gap: 4px; flex: none; }
+.homeLang button { min-height: 40px; touch-action: manipulation; }
+.homeSides { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.homeSide { position: relative; display: flex; align-items: flex-end; padding: 0; border: 0; cursor: pointer; text-align: left; background-size: cover; background-position: center; color: #fff; touch-action: manipulation; overflow: hidden; }
+.homeTemple { background-color: #2b4a38; background-image: url("pictures/home-temple.jpg"); }
+.homeChurch { background-color: #3a2a1a; background-image: url("pictures/home-church.jpg"); }
+.homeSide:hover .homeText b, .homeSide:focus-visible .homeText b { background: #fff; color: #17121c; }
+.homeText { display: flex; flex-direction: column; gap: 4px; width: 100%; padding: 56px 20px 20px; background: linear-gradient(transparent, rgba(8,6,4,.92) 46%); }
+.homeText strong { font: 700 clamp(30px, 5vw, 54px)/1.08 var(--display); }
+.homeText em { font-style: normal; font-size: 16px; color: var(--gold); font-weight: 600; }
+.homeText span { font-size: 15px; line-height: 1.45; max-width: 44ch; color: #eadfca; }
+.homeText b { align-self: flex-start; margin-top: 10px; padding: 10px 22px; background: var(--gold); color: var(--ink); font-weight: 600; }
+.homeNote { margin: 0; padding: 10px 16px; font-size: 13px; color: var(--muted); text-align: center; }
+.homeLoading { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 14px 24px; background: #1a1712; border: 1px solid var(--gold); font-size: 16px; }
+@media (max-width: 680px) { .homeSides { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } .homeText { padding: 36px 16px 14px; } }
+body[data-site="temple"] .personNote { bottom: 128px; }
+.templeBar { position: absolute; left: 50%; transform: translateX(-50%); bottom: 76px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: calc(100% - 32px); pointer-events: auto; }
+.windowFrame { position: absolute; inset: 0; pointer-events: none; border: clamp(16px, 4vw, 34px) solid #3a1710; box-shadow: inset 0 0 0 5px #c99b48, inset 0 0 60px rgba(20,8,4,.55); }
+.templeBar button { min-height: 44px; background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; touch-action: manipulation; }
+.beadTap { display: block; width: 150px; height: 150px; margin: 8px auto; border-radius: 50%; font: 700 42px var(--display); touch-action: manipulation; }
+.wishPick { display: block; width: 100%; margin-bottom: 4px; padding: 9px 10px; text-align: left; touch-action: manipulation; }
+#wishPanel, #soundPanel, #weatherPanel, #aboutPanel, #beadPanel { max-height: calc(100dvh - 24px); overflow-y: auto; }
+body[data-place="outside"] [data-where="in"], body[data-place="inside"] [data-where="out"] { display: none !important; }
+#outsideView { position: absolute; inset: 0; }
+.backBtn.doorBtn { top: auto; bottom: 76px; right: auto; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; }
+.backBtn { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); top: 14px; min-height: 42px; pointer-events: auto; touch-action: manipulation; }
+.meGrid { display: grid; grid-template-columns: minmax(170px, 220px) 1fr; gap: 16px; }
+.meStage canvas { display: block; width: 150px; height: 225px; margin: 0 auto 10px; image-rendering: pixelated; background: #2b2318; }
+.meShow { display: flex; gap: 8px; align-items: center; margin: 10px 0 6px; font-size: 14px; }
+#meChoices fieldset { border: 0; margin: 0 0 10px; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+#meChoices legend { padding: 0; margin-bottom: 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
+#meChoices button { min-height: 38px; font-size: 14px; touch-action: manipulation; }
+#meChoices .swatch { width: 38px; padding: 0; border: 2px solid var(--line); }
+#meChoices .swatch[aria-pressed="true"] { outline: 3px solid var(--gold); outline-offset: 1px; background-image: none; }
+#meDialog { max-height: calc(100dvh - 24px); overflow-y: auto; }
+@media (max-width: 560px) { .backBtn { top: 84px; } .meGrid { grid-template-columns: 1fr; } .meStage canvas { width: 96px; height: 144px; } }
+.personNote { position: absolute; left: 50%; transform: translateX(-50%); bottom: 76px; margin: 0; padding: 8px 12px; background: rgba(20,16,12,.88); border: 1px solid var(--line); color: var(--cream); font-size: 14px; max-width: calc(100% - 32px); pointer-events: none; }
+.sutraText { max-width: 62ch; margin-inline: auto; }
+.sutraText p { margin: 0 0 14px; font: 400 18px/1.7 var(--display); color: var(--cream); }
+.sutraPick { display: block; width: 100%; min-height: 56px; margin-bottom: 6px; text-align: left; touch-action: manipulation; }
+.sutraPick small { display: block; color: var(--muted); font-size: 13px; font-weight: 400; }
+.bookLink { display: inline-block; padding: 10px 0; color: var(--gold); }
+.panel.wide { width: min(820px, calc(100vw - 24px)); }
+.picGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.picThumb { display: flex; flex-direction: column; gap: 6px; padding: 6px; text-align: left; font-size: 13px; line-height: 1.3; touch-action: manipulation; }
+.picThumb img { width: 100%; height: 130px; object-fit: cover; display: block; }
+#picImage { display: block; max-width: 100%; max-height: min(62dvh, 620px); margin: 0 auto 10px; }
+#picName { margin: 0 0 2px; font-weight: 600; }
+#picCredit { margin: 0 0 10px; }
+.trackList h3 { margin: 12px 0 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.track { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; padding: 9px 10px; margin-bottom: 4px; text-align: left; touch-action: manipulation; }
+.track small { color: var(--muted); }
+.track[aria-pressed="true"], .track[aria-pressed="true"] small { background: #2b2214; border-color: var(--gold); color: var(--gold); }
+.vol { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+.musicPill { pointer-events: auto; touch-action: manipulation; min-height: 46px; }
+#picturesDialog, #musicDialog { max-height: calc(100dvh - 24px); overflow-y: auto; }
+</style>
+</head><body><section id="home" class="home" aria-labelledby="homeLead">
+  <div class="homeTop"><p id="homeLead" data-home="lead"></p><div class="homeLang"><button data-pick-lang="vi">Tiếng Việt</button><button data-pick-lang="en">English</button></div></div>
+  <div class="homeSides">
+    <button class="homeSide homeTemple" data-enter="temple"><span class="homeText"><strong data-home="temple"></strong><em data-home="templeName"></em><span data-home="templeLine"></span><b data-home="go"></b></span></button>
+    <button class="homeSide homeChurch" data-enter="church"><span class="homeText"><strong data-home="church"></strong><em data-home="churchName"></em><span data-home="churchLine"></span><b data-home="go"></b></span></button>
+  </div>
+  <p class="homeNote" data-home="note"></p>
+  <p id="homeLoading" class="homeLoading" role="status" hidden data-home="load"></p>
+</section>
+<div class="stage">
+  <canvas id="outsideView" hidden aria-label="The church grounds"></canvas>
+  <canvas id="view" aria-label="3D view inside the church nave"></canvas>
+  <div class="title"><h1></h1><p id="titleLine"></p></div>
+  <button id="backToNave" class="backBtn" hidden data-vi="Về lòng nhà thờ">Back to the nave</button>
+  <button id="doorBtn" class="backBtn doorBtn" hidden data-vi="Ra ngoài">Go outside</button>
+  <button id="enterBtn" class="backBtn doorBtn" hidden data-vi="Vào nhà thờ">Enter the church</button>
+  <p id="loadingNote" class="personNote" role="status" hidden>Walking outside...</p>
+  <p id="personNote" class="personNote" role="status" hidden></p>
+  <div class="controls">
+    <div class="group" data-keep aria-label="Quick"></div>
+    <div class="group" data-site="temple" aria-label="Practice" data-vi="Thực hành"><button data-me data-vi="Nhân vật của tôi">My character</button><button data-temple="read" data-vi="Đọc kinh">Read a sutra</button><button data-temple="wish" data-vi="Gửi lời chúc">Send a wish</button><button data-temple="beads" data-vi="Tràng hạt">Beads</button><button data-temple="fish" data-vi="Gõ mõ">Wooden fish</button><button data-temple="sound" data-vi="Âm thanh">Sound</button><button data-temple="weather" data-vi="Thời tiết">Weather</button><button data-temple="about" data-vi="Giới thiệu">About Cloud Temple</button></div>
+    <div class="group" data-site="temple" aria-label="Go to" data-vi="Đi đến"><button data-owalk="greatGate" data-vi="Đại môn">Great Gate</button><button data-owalk="garden" data-vi="Vườn thiền">Zen garden</button><button data-owalk="deck" data-vi="Hiên vườn">Garden deck</button><button data-owalk="tamquan" data-vi="Tam quan">Three-bay gate</button><button data-owalk="lakeSouth" data-vi="Bờ hồ">Lake shore</button><button data-owalk="tower" data-vi="Tháp giữa hồ">Pagoda</button><button data-owalk="towerTop" data-vi="Đỉnh tháp">Top of the pagoda</button><button data-owalk="mainHall" data-vi="Chính điện">Main hall</button><button data-owalk="lecture" data-vi="Giảng đường">Lecture hall</button><button data-owalk="zen" data-vi="Thiền đường">Meditation hall</button><button data-owalk="guest" data-vi="Nhà khách">Guest hall</button><button data-owalk="tea" data-vi="Trà thất">Tea house</button><button data-owalk="bell" data-vi="Gác chuông">Bell tower</button></div>
+    <div class="group" data-site="temple" aria-label="The climb" data-vi="Đường lên núi"><button data-owalk="gate" data-vi="Cổng thung lũng">Valley gate</button><button data-owalk="road" data-vi="Đường đá">Stone path</button><button data-owalk="bridge" data-vi="Cầu">Bridge</button><button data-owalk="terrace1" data-vi="Sân dưới">Lower court</button><button data-owalk="stairs1" data-vi="Dãy bậc đầu">First stairs</button><button data-owalk="terrace2" data-vi="Chiếu nghỉ thứ nhất">First landing</button><button data-owalk="stairs2" data-vi="Dãy bậc giữa">Second stairs</button><button data-owalk="terrace3" data-vi="Chiếu nghỉ thứ hai">Second landing</button><button data-owalk="stairs3" data-vi="Dãy bậc cuối">Last stairs</button></div>
+    <div class="group" data-site="temple" aria-label="Grand views" data-vi="Toàn cảnh"><button data-oview="summit" data-vi="Đỉnh núi">The summit</button><button data-oview="quanAm" data-vi="Tượng Quan Âm">Quan Âm statue</button><button data-oview="islands" data-vi="Đảo bay">Floating islands</button><button data-oview="seaOfCloud" data-vi="Biển mây">Sea of cloud</button><button data-oview="ridge" data-vi="Sườn núi và cầu">Ridge and bridge</button><button data-oview="wholeRange" data-vi="Toàn dãy núi">Whole range</button></div>
+    <div class="group" data-site="church" aria-label="Prayer and reading" data-vi="Cầu nguyện và đọc"><button data-me data-vi="Nhân vật của tôi">My character</button><button data-confess data-vi="Phòng giải tội">Confession booth</button><button data-panel="bible" data-vi="Kinh Thánh">Bible</button><button data-panel="hymn" data-vi="Thánh ca">Hymns</button><button data-panel="priest" data-vi="Linh mục">Priest</button><button data-music data-vi="Âm nhạc">Music</button><button data-pictures data-vi="Tranh ảnh">Pictures</button></div>
+    <div class="group" aria-label="Language" data-vi="Ngôn ngữ"><button data-pick-lang="vi">Tiếng Việt</button><button data-pick-lang="en">English</button></div>
+    <div class="group" aria-label="People" data-vi="Mọi người"><button data-people data-vi="Ẩn mọi người">Hide people</button></div>
+    <div class="group" data-site="church" data-where="out" aria-label="Walk outside" data-vi="Đi dạo bên ngoài"><button data-owalk="gate" data-vi="Cổng thung lũng">Valley gate</button><button data-owalk="road" data-vi="Đường rừng">Forest road</button><button data-owalk="bridge" data-vi="Cầu">Bridge</button><button data-owalk="balcony" data-vi="Ban công hẻm núi">Gorge balcony</button><button data-owalk="terrace1" data-vi="Sân bậc dưới">Lower terrace</button><button data-owalk="stairs1" data-vi="Dãy bậc thứ nhất">First stairs</button><button data-owalk="terrace2" data-vi="Sân vách đá">Cliff terrace</button><button data-owalk="stairs2" data-vi="Dãy bậc thứ hai">Second stairs</button><button data-owalk="terrace3" data-vi="Sân bậc cao">High terrace</button><button data-owalk="stairs3" data-vi="Dãy bậc lớn">Grand stairs</button><button data-owalk="forecourt" data-vi="Quảng trường">Forecourt</button><button data-owalk="gardenE" data-vi="Vườn đông">East gardens</button><button data-owalk="gardenW" data-vi="Vườn tây">West gardens</button><button data-owalk="doors" data-vi="Cửa nhà thờ">Church doors</button><button data-go-in data-vi="Vào nhà thờ">Enter the church</button></div>
+    <div class="group" data-site="church" data-where="in" aria-label="Walk outside from here" data-vi="Ra ngoài"><button data-walk="doors" data-vi="Ra ngoài">Go outside</button><button data-walk="forecourt" data-vi="Quảng trường">Forecourt</button><button data-walk="gardenE" data-vi="Vườn đông">East gardens</button><button data-walk="gardenW" data-vi="Vườn tây">West gardens</button><button data-walk="stairs3" data-vi="Dãy bậc lớn">Grand stairs</button><button data-walk="bridge" data-vi="Cầu">Bridge</button><button data-walk="gate" data-vi="Cổng thung lũng">Valley gate</button></div>
+    <div class="group" data-site="church" data-where="out" aria-label="Grand views" data-vi="Toàn cảnh"><button data-oview="mountain">Back mountain</button><button data-oview="blossom">Blossom slope</button><button data-oview="overview">Church to lake</button><button data-oview="lake">Lake view</button><button data-oview="shore">On the lake</button><button data-oview="upper">Mountain river</button><button data-oview="upperLip">River to falls</button><button data-oview="falls">Waterfall</button><button data-oview="fallsNear">Waterfall close</button><button data-oview="river">River</button><button data-oview="gorge">Gorge</button><button data-oview="site">Whole site</button><button data-oview="bridge" data-vi="Cầu">Bridge</button><button data-oview="angle">Church</button><button data-oview="front">Front</button><button data-oview="wall">Walls and angels</button><button data-oview="angel">Angel close-up</button><button data-oview="statue">Mary statue</button><button data-oview="garden">Gardens</button><button data-oview="portal">Doors</button><button data-oview="spire">Spire</button></div>
+    <div class="group" data-where="out" aria-label="Season" data-vi="Mùa"><button data-season="spring" data-vi="Xuân">Spring</button><button data-season="summer" data-vi="Hạ">Summer</button><button data-season="autumn" data-vi="Thu">Autumn</button><button data-season="winter" data-vi="Đông">Winter</button></div>
+    <div class="group" data-where="out" aria-label="Time of day" data-vi="Thời gian trong ngày"><button data-otime="sunrise" data-vi="Bình minh">Sunrise</button><button data-otime="morning" data-vi="Ban ngày">Day</button><button data-otime="sunset" data-vi="Hoàng hôn">Sunset</button><button data-otime="night" data-vi="Ban đêm">Night</button></div>
+    <div class="group" data-site="church" data-where="in" aria-label="Time of day" data-vi="Thời gian trong ngày"><button data-time="day" data-vi="Ban ngày">Day</button><button data-time="sunset" data-vi="Hoàng hôn">Sunset</button><button data-time="night" data-vi="Ban đêm">Night</button></div>
+    <div class="group" data-site="church" data-where="in" aria-label="Go to" data-vi="Đi đến"><button data-view="doors">From the doors</button><button data-view="angle">Nave</button><button data-view="middle">Middle</button><button data-view="sidewalk">Side aisle</button><button data-view="chapel">Confession chapel</button><button data-view="chapelsE">East chapels</button><button data-view="chapelsW">West chapels</button><button data-view="crypt">Crypt</button><button data-view="refectory">Refectory</button><button data-view="kitchen">Kitchen</button><button data-view="pozzo">Pozzo ceiling</button><button data-view="up">Look up</button><button data-view="dome">Under the dome</button><button data-view="altar">Altar</button><button data-view="relief">Altar relief</button><button data-view="gallery">Picture gallery</button><button data-view="loft">Choir loft</button></div>
+  </div>
+</div>
+<dialog id="bibleDialog" class="panel" aria-labelledby="bibleTitle">
+  <form method="dialog"><button class="close">Close</button></form>
+  <h2 id="bibleTitle">Bible</h2>
+  <div class="row">
+    <select id="bibleVersion" aria-label="Translation"></select><select id="bibleBook" aria-label="Book"></select><select id="bibleChapter" aria-label="Chapter"></select>
+    <button id="biblePrev">Previous</button><button id="bibleNext">Next</button><button id="bibleSmaller" aria-label="Smaller text">A-</button><button id="bibleBigger" aria-label="Larger text">A+</button>
+  </div>
+  <div id="biblePage" tabindex="0"></div>
+  <p class="fine" id="bibleNote"></p>
+</dialog>
+<dialog id="hymnDialog" class="panel" aria-labelledby="hymnTitle">
+  <form method="dialog"><button class="close">Close</button></form>
+  <h2 id="hymnTitle">Hymns</h2>
+  <div class="row">
+    <select id="hymnPick" aria-label="Hymn"></select><select id="hymnVerses" aria-label="Verses"></select>
+    <button id="hymnPlay" aria-pressed="false">Play and sing</button>
+  </div>
+  <div class="row">
+    <label>Speed <select id="hymnTempo"><option value="0.8">Slow</option><option value="1" selected>Normal</option><option value="1.2">Fast</option></select></label>
+    <label>Key <select id="hymnKey"><option value="-3">Lower 3</option><option value="-2">Lower 2</option><option value="-1">Lower 1</option><option value="0" selected>Original</option><option value="1">Higher 1</option><option value="2">Higher 2</option><option value="3">Higher 3</option></select></label>
+    <label><input type="checkbox" id="hymnGuide" checked> Play the melody</label>
+    <label>Volume <input type="range" id="hymnVolume" min="0" max="1" step="0.05" value="0.7"></label>
+  </div>
+  <div class="stagebox"><div id="hymnVerse"></div><div id="hymnNow" aria-live="polite"></div><div id="hymnNext"></div><div id="hymnBar"></div></div>
+  <div id="hymnText"></div>
+  <p class="fine" id="hymnCredit"></p>
+  <p class="fine">Turn off Play the melody to sing over the organ alone.</p>
+</dialog>
+<dialog id="priestDialog" class="panel" aria-labelledby="priestTitle">
+  <form method="dialog"><button class="close">Close</button></form>
+  <h2 id="priestTitle">Priest outfits</h2>
+  <div id="priestList"></div>
+  <p class="fine" id="priestNow"></p>
+</dialog>
+<dialog id="confessDialog" class="panel" aria-labelledby="confessTitle">
+  <form method="dialog"><button class="close" data-vi="Đóng">Close</button></form>
+  <div class="row langRow"><button id="confessEn" data-lang="en">English</button><button id="confessVi" data-lang="vi">Tiếng Việt</button></div>
+  <h2 id="confessTitle"></h2>
+  <div id="confessBody"></div>
+</dialog>
+<script src="schedule.js"></script>
+<script src="booths.js"></script>
+<script src="media.js"></script>
+<script src="cast.js"></script>
+<script src="options.js"></script>
+<script src="chat-rules.js"></script>
+<script src="temple/world.js"></script>
+<script src="walk.js"></script>
+<script src="camera-guard.js"></script>
+<script src="site.js"></script>
+<script src="hymns.js"></script>
+<script type="module" src="home.js"></script>
+</body></html>
